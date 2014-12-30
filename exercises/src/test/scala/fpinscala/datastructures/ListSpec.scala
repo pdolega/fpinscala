@@ -74,4 +74,17 @@ class ListSpec extends WordSpec {
       assert(dropWhile(List(1, 1, 2, 1, 1), (x: Int) => x < 2) == List(2, 1, 1))
     }
   }
+
+  "Init" should {
+    "retrieve all except last element" in {
+      assert(init(List(1, 2, 3, 4)) == List(1, 2, 3))
+      assert(init(List("last")) == Nil)
+    }
+
+    "yield error on empty list" in {
+      intercept[RuntimeException] {
+        init(Nil)
+      }
+    }
+  }
 }
