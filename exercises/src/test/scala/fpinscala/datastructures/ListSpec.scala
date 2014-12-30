@@ -48,4 +48,30 @@ class ListSpec extends WordSpec {
       }
     }
   }
+
+  "Drop" should {
+    "remove first N elements if given number" in {
+      assert(drop(List(1, 2, 3, 4, 5), 1) == List(2, 3, 4, 5))
+      assert(drop(List(true, false, false), 2) == List(false))
+      assert(drop(List(5), 1) == Nil)
+    }
+
+    "behave correctly with questionable input" in {
+      assert(drop(List(1, 2, 3), 0) == List(1, 2, 3))
+      intercept[RuntimeException] {
+        drop(List('a', 'b'), 3)
+      }
+    }
+
+    "remove as long as predicate matches" in {
+      assert(dropWhile(List(1, 2, 3), (x: Int) => x < 3) == List(3))
+      assert(dropWhile(List(1, 2, 3), (x: Int) => x >5) == List(1, 2, 3))
+      assert(dropWhile(List('a', 'b', 'c'), (x: Char) => x < 'z') == Nil)
+      assert(dropWhile(Nil, (x: Double) => x == 0.0) == Nil)
+    }
+
+    "remove as long as predicate matches and do not continue even if won't match later on" in {
+      assert(dropWhile(List(1, 1, 2, 1, 1), (x: Int) => x < 2) == List(2, 1, 1))
+    }
+  }
 }

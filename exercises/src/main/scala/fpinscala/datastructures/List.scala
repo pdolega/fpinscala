@@ -1,5 +1,7 @@
 package fpinscala.datastructures
 
+import scala.annotation.tailrec
+
 sealed trait List[+A] // `List` data type, parameterized on a type, `A`
 case object Nil extends List[Nothing] // A `List` data constructor representing the empty list
 case class Cons[+A](head: A, tail: List[A]) extends List[A] // Another data constructor, representing nonempty lists. Note that `tail` is another `List[A]`, which may be `Nil` or another `Cons`.
@@ -57,9 +59,25 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(_, t) => Cons(h, t)
   }
 
-  def drop[A](l: List[A], n: Int): List[A] = sys.error("todo")
+  @tailrec
+  def drop[A](l: List[A], n: Int): List[A] = {
+    require(n >= 0, "Number of elements to drop must be nonnegative")
 
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = sys.error("todo")
+    if(n > 0) {
+      l match {
+        case Nil => sys.error("Number of elements to drop bigger than the size of the list")
+        case Cons(_, t) => drop(t, n - 1)
+      }
+    } else {
+      l
+    }
+  }
+
+  @tailrec
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    case Nil => Nil
+    case Cons(h, t) => if(f(h)) dropWhile(t,f) else Cons(h, t)
+  }
 
   def init[A](l: List[A]): List[A] = sys.error("todo")
 
