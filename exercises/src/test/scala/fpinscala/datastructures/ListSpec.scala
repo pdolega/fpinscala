@@ -87,4 +87,12 @@ class ListSpec extends WordSpec {
       }
     }
   }
+
+  "length" should {
+    "calculate size of the list correctly" in {
+      assert(length(List(1, 2, 3)) == 3)
+      assert(length(List("last")) == 1)
+      assert(length(Nil) == 0)
+    }
+  }
 }
