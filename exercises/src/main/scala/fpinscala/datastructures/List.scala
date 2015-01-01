@@ -10,13 +10,17 @@ object List { // `List` companion object. Contains functions for creating and wo
   def sum(ints: List[Int]): Int = ints match { // A function that uses pattern matching to add up a list of integers
     case Nil => 0 // The sum of the empty list is 0.
     case Cons(x,xs) => x + sum(xs) // The sum of a list starting with `x` is `x` plus the sum of the rest of the list.
-  } 
+  }
+
+  def sumFoldLeft(ints: List[Int]): Int = foldLeft(ints, 0)(_ + _)
   
   def product(ds: List[Double]): Double = ds match {
     case Nil => 1.0
     case Cons(0.0, _) => 0.0
     case Cons(x,xs) => x * product(xs)
   }
+
+  def productFoldLeft(ds: List[Double]): Double = foldLeft(ds, 1.0)(_ * _)
   
   def apply[A](as: A*): List[A] = // Variadic function syntax
     if (as.isEmpty) Nil
@@ -89,7 +93,15 @@ object List { // `List` companion object. Contains functions for creating and wo
 
   def length[A](l: List[A]): Int = foldRight(l, 0)((_, acc) => acc + 1)
 
-  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = sys.error("todo")
+  def lengthFoldLeft[A](l: List[A]): Int = foldLeft(l, 0)((acc, _) => acc + 1)
+
+  @tailrec
+  def foldLeft[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    l match {
+      case Nil => z
+      case Cons(h, t) => foldLeft(t, f(z, h))(f)
+    }
+  }
 
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }

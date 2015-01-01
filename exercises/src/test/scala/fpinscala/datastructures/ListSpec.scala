@@ -95,4 +95,49 @@ class ListSpec extends WordSpec {
       assert(length(Nil) == 0)
     }
   }
+
+  "foldLeft" should {
+    "retrieve correct results" in {
+      assert(foldLeft(List(1, 2, 3), 0)(_+_) == 6)
+      assert(foldLeft(List(2, 2, 2), 1)(_*_) == 8)
+      assert(foldLeft(List(true, true, true), 0)((acc, _) => acc + 1) == 3)
+    }
+
+    "still work with Nil" in {
+      assert(foldLeft(Nil: List[Int], 5)(_+_) == 5)
+      assert(foldLeft(List[Double](), 5.0)(_*_) == 5.0)
+    }
+  }
+
+  "functions using foldLeft" should {
+    "behave as original for sum" in {
+      val ints5 = List(1, 2, 3, 4, 5)
+      val ints1 = List(7)
+      val ints0 = List[Int]()
+
+      assert(sum(ints5) == sumFoldLeft(ints5))
+      assert(sum(ints1) == sumFoldLeft(ints1))
+      assert(sum(ints0) == sumFoldLeft(ints0))
+    }
+
+    "behave as original for product" in {
+      val prod5 = List(1.0, 2.0, 3.0, 4.0, 5.0)
+      val prod1 = List(7.0)
+      val prod0 = List[Double]()
+
+      assert(product(prod5) == productFoldLeft(prod5))
+      assert(product(prod1) == productFoldLeft(prod1))
+      assert(product(prod0) == productFoldLeft(prod0))
+    }
+
+    "behave as original for length" in {
+      val char5 = List('a', 'b', 'c', 'd', 'e')
+      val double1 = List(7.0)
+      val empty = Nil
+
+      assert(length(char5) == lengthFoldLeft(char5))
+      assert(length(double1) == lengthFoldLeft(double1))
+      assert(length(empty) == lengthFoldLeft(empty))
+    }
+  }
 }
