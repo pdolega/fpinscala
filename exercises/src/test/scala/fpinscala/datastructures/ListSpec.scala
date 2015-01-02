@@ -201,4 +201,29 @@ class ListSpec extends WordSpec {
       assert(map(List[String]())(_.toDouble) == Nil)
     }
   }
+
+  "filtering" should {
+    "work correctly" in {
+      assert(filter(List(1, 2, 3)){ x => true } == List(1, 2, 3))
+      assert(filter(List(1, 2, 3)){ x => false } == Nil)
+      assert(filter(List('a', 'b', 'c')){ _ >= 'b' } == List('b', 'c'))
+      assert(filter(List[String]()){ _.substring(5, 10).toDouble == 10.0 } == Nil)
+    }
+
+    "even with implementation using flatMap" in {
+      assert(filterWithFlatmap(List(1, 2, 3)){ x => true } == List(1, 2, 3))
+      assert(filterWithFlatmap(List(1, 2, 3)){ x => false } == Nil)
+      assert(filterWithFlatmap(List('a', 'b', 'c')){ _ >= 'b' } == List('b', 'c'))
+      assert(filterWithFlatmap(List[String]()){ _.substring(5, 10).toDouble == 10.0 } == Nil)
+    }
+  }
+
+  "flatmap that shit" should {
+    "just work" in {
+      assert(flatMap(List(1, 2, 3)){ x => List(x, x)} == List(1, 1, 2, 2, 3, 3))
+      assert(flatMap(List(1, 2, 3)){ x => Nil} == Nil)
+      assert(flatMap(List[String]()){ x => List(x * 5) } == Nil)
+      assert(flatMap(List("test", "abc")){ x => List(x * 2) } == List("testtest", "abcabc"))
+    }
+  }
 }

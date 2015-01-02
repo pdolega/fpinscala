@@ -1,6 +1,7 @@
 package fpinscala.datastructures
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 sealed trait List[+A] // `List` data type, parameterized on a type, `A`
 case object Nil extends List[Nothing] // A `List` data constructor representing the empty list
@@ -127,5 +128,28 @@ object List { // `List` companion object. Contains functions for creating and wo
 
   def mapToString(l: List[Double]): List[String] = foldRight(l, List[String]())((elem, acc) => Cons(elem.toString, acc))
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = foldRight(l, List[B]())((elem, acc) => Cons(f(elem), acc))
+  def map[A,B](l: List[A])(f: A => B): List[B] = foldRight(l, List[B]()){ (elem, acc) => Cons(f(elem), acc) }
+
+  // wanted to skip foldRight this time
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = {
+    val buffer = new ListBuffer[A]()
+
+    @tailrec
+    def fillBuff(as: List[A])(f: A => Boolean) {
+      as match {
+        case Nil => ()
+        case Cons(h, t) => {
+          if(f(h)) buffer += h
+          fillBuff(t)(f)
+        }
+      }
+    }
+
+    fillBuff(as)(f)
+    List(buffer.toList: _*)
+  }
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = concatenate(map(as)(f))
+
+  def filterWithFlatmap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as){ x => if(f(x)) List(x) else Nil }
 }
