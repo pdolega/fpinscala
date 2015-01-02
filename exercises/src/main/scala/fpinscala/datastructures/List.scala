@@ -173,4 +173,21 @@ object List { // `List` companion object. Contains functions for creating and wo
     fillBuffer(a, b)
     List(buffer.toList: _*)
   }
+
+  @tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+
+    @tailrec
+    def startsWith(list: List[A], inner: List[A]): Boolean = (list, inner) match {
+      case (_, Nil) => true
+      case (Cons(h1, t1), Cons(h2, t2)) if h1 == h2 => startsWith(t1, t2)
+      case _ => false
+    }
+
+    sup match {
+      case list if startsWith(list, sub) => true
+      case Cons(h, t) => hasSubsequence(t, sub)
+      case _ => false
+    }
+  }
 }

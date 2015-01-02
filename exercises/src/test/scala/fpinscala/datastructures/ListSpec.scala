@@ -248,5 +248,28 @@ class ListSpec extends WordSpec {
         List("1a", "2b", "3c")
       )
     }
+
+    "hasSubsequence" should {
+      "work correctly for simple cases" in {
+        assert(hasSubsequence(List(1, 2, 3, 4, 5), List(1, 2, 3, 4, 5)))
+        assert(hasSubsequence(List(1, 2, 3, 4, 5), List(1, 2, 3, 4)))
+        assert(hasSubsequence(List(1, 2, 3, 4, 5), List(2, 3, 4)))
+        assert(hasSubsequence(List(1, 2, 3, 4, 5), List(1)))
+        assert(hasSubsequence(List("1", "2", "3", "4", "5"), List("3")))
+
+        assert(!hasSubsequence(List(1, 2, 3, 4, 5), List(1, 3)))
+        assert(!hasSubsequence(List(1, 2, 3, 4, 5), List(2, 1)))
+        assert(!hasSubsequence(List(1, 2, 3, 4, 5), List(1, 2, 3, 8, 5)))
+
+        assert(hasSubsequence(List(1, 1, 3, 4, 5), List(1, 3, 4)))
+      }
+
+      "work correctly for degenerate case" in {
+        assert(hasSubsequence(List('a', 'b'), Nil))
+        assert(hasSubsequence(Nil, Nil))
+
+        assert(!hasSubsequence(Nil, List(1, 2)))
+      }
+    }
   }
 }
