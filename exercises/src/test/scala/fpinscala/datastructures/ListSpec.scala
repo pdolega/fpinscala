@@ -140,4 +140,51 @@ class ListSpec extends WordSpec {
       assert(length(empty) == lengthFoldLeft(empty))
     }
   }
+
+  "reverse" should {
+    "work correctly" in {
+      assert(reverse(List(3, 2, 1)) == List(1, 2, 3))
+      assert(reverse(List(true, false)) == List(false, true))
+      assert(reverse(Nil) == Nil)
+    }
+  }
+
+  "folds with reversal" should {
+    "work correctly with foldLeft expressed as foldRight" in {
+      val list = List(1, 2, 3, 4, 5)
+
+      assert(foldLeft(list, 0)(_ + _) == foldLeftWithFoldRight(list, 0)(_ + _))
+      assert(foldLeft(list, 1)(_ * _) == foldLeftWithFoldRight(list, 1)(_ * _))
+    }
+
+    "foldRight expressed by foldLeft with reversed associativity" in {
+      val list = List(1, 2, 3, 4, 5)
+
+      assert(foldRight(list, 0)(_ + _) == foldRightWithFoldLeft1(list, 0)(_ + _))
+      assert(foldRight(list, 1)(_ * _) == foldRightWithFoldLeft1(list, 1)(_ * _))
+    }
+  }
+
+  "appendFold" should {
+    "append lists correctly" in {
+      assert(appendFold(List(1, 2), List(3, 4)) == List(1, 2, 3, 4))
+      assert(appendFold(List('a'), List('b')) == List('a', 'b'))
+      assert(appendFold(List(1, 2, 3, 4, 5), List(6, 7, 8, 9)) == List(1, 2, 3, 4, 5, 6, 7, 8, 9))
+    }
+
+    "append empty lists too" in {
+      assert(appendFold(Nil, List(1, 2, 3)) == List(1, 2, 3))
+      assert(appendFold(List(1, 2, 3), Nil) == List(1, 2, 3))
+      assert(appendFold(Nil, Nil) == Nil)
+    }
+  }
+
+  "concatenate list of lists" should {
+    "work correctly" in {
+      assert(concatenate(List(List(1, 2), List(3), List(4, 5, 6))) == List(1, 2, 3, 4, 5, 6))
+      assert(concatenate(List(List(true, false), Nil)) == List(true, false))
+      assert(concatenate(List(Nil, Nil)) == Nil)
+      assert(concatenate(Nil) == concatenate(List(Nil, Nil, Nil)))
+    }
+  }
 }
