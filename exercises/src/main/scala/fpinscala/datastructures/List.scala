@@ -152,4 +152,25 @@ object List { // `List` companion object. Contains functions for creating and wo
   def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = concatenate(map(as)(f))
 
   def filterWithFlatmap[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as){ x => if(f(x)) List(x) else Nil }
+
+  def zipByAdding(list1: List[Int], list2: List[Int]): List[Int] = zipWith(list1, list2) { _ + _ }
+
+  def zipWith[A, B, C](a: List[A], b: List[B])(f: (A, B) => C): List[C] = {
+    val buffer = new ListBuffer[C]
+
+    @tailrec
+    def fillBuffer(list1: List[A], list2: List[B]): Unit = {
+      (list1, list2) match {
+        case (Nil, Nil) => ()
+        case (Cons(h1, t1), Cons(h2, t2)) => {
+          buffer += f(h1, h2)
+          fillBuffer(t1, t2)
+        }
+        case _ => sys.error("Lists passed as params are not of equal length")
+      }
+    }
+
+    fillBuffer(a, b)
+    List(buffer.toList: _*)
+  }
 }

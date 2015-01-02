@@ -226,4 +226,27 @@ class ListSpec extends WordSpec {
       assert(flatMap(List("test", "abc")){ x => List(x * 2) } == List("testtest", "abcabc"))
     }
   }
+
+  "zip functions" should {
+    "work for zipByAdding" in {
+      assert(zipByAdding(List(1, 2, 3), List(1, 2, 3)) == List(2, 4, 6))
+      assert(zipByAdding(Nil, Nil) == Nil)
+    }
+
+    "raise error with degenerate cases for zipByAdding" in {
+      intercept[RuntimeException] {
+        zipByAdding(Nil, List(1))
+      }
+      intercept[RuntimeException] {
+        zipByAdding(List(1, 2), List(1))
+      }
+    }
+
+    "generic zipWith works perfectly !" in {
+      assert(
+        zipWith(List(1, 2, 3), List('a', 'b', 'c')) { (intParam, charParam) => s"$intParam$charParam" } ==
+        List("1a", "2b", "3c")
+      )
+    }
+  }
 }
