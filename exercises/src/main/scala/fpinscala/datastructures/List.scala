@@ -120,5 +120,12 @@ object List { // `List` companion object. Contains functions for creating and wo
 
   def concatenate[A](l: List[List[A]]): List[A] = foldRight(l, List[A]())(append)
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def mapAdd1ToEach(l: List[Int]): List[Int] = l match {
+    case Nil => Nil
+    case Cons(h, t) => Cons(h + 1, mapAdd1ToEach(t))
+  }
+
+  def mapToString(l: List[Double]): List[String] = foldRight(l, List[String]())((elem, acc) => Cons(elem.toString, acc))
+
+  def map[A,B](l: List[A])(f: A => B): List[B] = foldRight(l, List[B]())((elem, acc) => Cons(f(elem), acc))
 }

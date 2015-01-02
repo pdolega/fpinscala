@@ -187,4 +187,18 @@ class ListSpec extends WordSpec {
       assert(concatenate(Nil) == concatenate(List(Nil, Nil, Nil)))
     }
   }
+
+  "various map flavors" should {
+    "work correctly" in {
+      assert(mapAdd1ToEach(List(1, 2, 3)) == List(2, 3, 4))
+      assert(mapAdd1ToEach(Nil) == Nil)
+
+      assert(mapToString(List(1.0, 2.0, 3.0)) == List("1.0", "2.0", "3.0"))
+      assert(mapToString(Nil) == Nil)
+
+      assert(map(List(1, 2, 3))(_ + 1) == List(2, 3, 4))
+      assert(map(List(1.0, 2.0, 3.0))(_.toString) == List("1.0", "2.0", "3.0"))
+      assert(map(List[String]())(_.toDouble) == Nil)
+    }
+  }
 }
