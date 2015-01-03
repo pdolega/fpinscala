@@ -12,7 +12,12 @@ object Tree {
   }
 
   def max(tree: Tree[Int]): Int = tree match {
-    case Branch(left, right) => max(left).max(max(right))
     case Leaf(value) => value
+    case Branch(left, right) => max(left).max(max(right))
+  }
+
+  def depth[A](tree: Tree[A]): Int = tree match {
+    case Leaf(_) => 1
+    case Branch(left, right) => (depth(left) + 1) max (depth(right) + 1)
   }
 }
