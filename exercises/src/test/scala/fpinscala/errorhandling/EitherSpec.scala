@@ -43,4 +43,18 @@ class EitherSpec extends WordSpec {
       assert((Left(-1): Either[Int, Int]).map2(Left(-2): Either[Int, Int]) { _ + _ } == Left(-1))
     }
   }
+
+  "either companion" should {
+    "have correct implementation of sequence" in {
+      assert(sequence(List[Either[Int, Int]](Right(1), Right(2))) == Right(List(1, 2)))
+      assert(sequence(List[Either[Int, Int]](Right(1), Left(-1), Right(3))) == Left(-1))
+      assert(sequence(List[Either[Int, Int]](Left(-2), Left(-1))) == Left(-2))
+    }
+
+    "have correct implementation of traverse" in {
+      assert(traverse(List(1, 2, 3)) { x => Right(x) } == Right(List(1, 2, 3)))
+      assert(traverse(List(1, 2, 3)) { x => if(x < 3) Right(x) else Left(-1) } == Left(-1))
+      assert(traverse(List(1, 2, 3)) { x => Left(-x) } == Left(-1))
+    }
+  }
 }
