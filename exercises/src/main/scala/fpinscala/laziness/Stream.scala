@@ -1,6 +1,9 @@
 package fpinscala.laziness
 
 import Stream._
+
+import scala.annotation.tailrec
+
 trait Stream[+A] {
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
@@ -17,11 +20,34 @@ trait Stream[+A] {
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
-  def take(n: Int): Stream[A] = sys.error("todo")
 
-  def drop(n: Int): Stream[A] = sys.error("todo")
+  def toList: List[A] = foldRight(List[A]()) { _ :: _ }
 
-  def takeWhile(p: A => Boolean): Stream[A] = sys.error("todo")
+  def take(n: Int): Stream[A] = {
+    @tailrec
+    def takeInner(built: List[A], rest: Stream[A], currN: Int): List[A] = rest match {
+      case Empty => built
+      case Cons(h, tail) => if(currN > 0) takeInner(h() :: built, tail(), currN - 1) else built
+    }
+
+    Stream(takeInner(Nil, this, n).reverse : _*)
+  }
+
+  @tailrec
+  final def drop(n: Int): Stream[A] = this match {
+    case Empty => empty
+    case Cons(h, tail) => if (n > 0) tail().drop(n - 1) else Cons(h, tail)
+  }
+
+  def takeWhile(p: A => Boolean): Stream[A] = {
+    @tailrec
+    def takeInner(built: List[A], rest: Stream[A]): List[A] = rest match {
+      case Empty => built
+      case Cons(h, tail) => if(p(h())) takeInner(h() :: built, tail()) else built
+    }
+
+    Stream(takeInner(Nil, this).reverse : _*)
+  }
 
   def forAll(p: A => Boolean): Boolean = sys.error("todo")
 
