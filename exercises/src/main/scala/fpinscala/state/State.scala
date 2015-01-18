@@ -1,5 +1,6 @@
 package fpinscala.state
 
+import scala.annotation.tailrec
 
 trait RNG {
   def nextInt: (Int, RNG) // Should generate a random `Int`. We'll later define other functions in terms of `nextInt`.
@@ -30,7 +31,11 @@ object RNG {
       (f(a), rng2)
     }
 
-  def nonNegativeInt(rng: RNG): (Int, RNG) = ???
+  @tailrec
+  def nonNegativeInt(rng: RNG): (Int, RNG) = {
+    val (number, newRng) = rng.nextInt
+    if(number >= 0) (Math.abs(number), newRng) else nonNegativeInt(newRng)
+  }
 
   def double(rng: RNG): (Double, RNG) = ???
 
