@@ -124,9 +124,28 @@ class StreamSpec extends WordSpec {
       assert(Stream(1, 2, 3).zipWith(Stream(1)).toList == List((1,1)))
       assert(Stream(1, 2, 3).zipWith(Stream("1", "2", "3", "4")).toList == List((1,"1"),(2,"2"),(3,"3")))
 
-
       assert(Stream(1, 2).zipAll(Stream("1", "2", "3")).toList == List((Some(1),Some("1")),(Some(2),Some("2")),(None,Some("3"))))
       assert(Stream(1, 2, 3).zipAll(Stream("1", "2")).toList == List((Some(1),Some("1")),(Some(2),Some("2")),(Some(3),None)))
+    }
+
+    "have correct implementation of startsWith" in {
+      assert(Stream(1, 2, 3).startsWith(Stream(1, 2)))
+      assert(Stream(1, 2, 3).startsWith(Empty))
+      assert(!Stream(1, 2, 3).startsWith(Stream(0, 1, 2)))
+      assert(!Stream(1, 2, 3).startsWith(Stream(2, 3)))
+      assert(!Stream(1, 2).startsWith(Stream(1, 2, 3)))
+    }
+
+    "have correct implementation of tails" in {
+      assert(Stream(1, 2, 3).tails.map { _.toList }.toList == List(List(1,2,3), List(2, 3), List(3), List()))
+      assert(Stream("a").tails.map { _.toList }.toList == List(List("a"), List()))
+      assert(Stream().tails.map { _.toList }.toList == List(Nil))
+    }
+
+    "have correct implementation of scanRight" in {
+      assert(Stream(1, 2, 3).scanRight(0){_ + _}.toList == List(6, 5, 3, 0))
+      assert(Stream(1, 2, 3).scanRight(Stream[Int]()){ case (elem, acc) => Cons(() => elem, () => acc) }.map{ _.toList }.toList ==
+        List(List(1, 2, 3), List(2, 3), List(3), Nil))
     }
   }
 }

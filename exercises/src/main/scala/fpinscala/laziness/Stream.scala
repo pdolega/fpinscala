@@ -117,7 +117,25 @@ trait Stream[+A] {
     }
   }
 
-  def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
+  def startsWith[B](s: Stream[B]): Boolean = {
+    this.zipAll(s).takeWhile { case (_, elem2Opt) => elem2Opt.isDefined }.forAll{ case (elem1, elem2) => elem1 == elem2 }
+  }
+
+  def tails: Stream[Stream[A]] = {
+    val tail = unfold(this) {
+      case Cons(h, t) => Some((t(), t()))
+      case Empty => None
+    }
+    Cons(() => this, () => tail)
+  }
+
+  def scanRight[B](acc: B)(f: (A, B) => B): Stream[B] = {
+    foldRight((Stream(acc), acc)) { case (elem, state) =>
+      lazy val (stream, accInt) = state
+      val calc = f(elem, accInt)
+      (Cons(() => calc, () => stream), calc)
+    }._1
+  }
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
