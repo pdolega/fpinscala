@@ -49,7 +49,37 @@ trait Stream[+A] {
     Stream(takeInner(Nil, this).reverse : _*)
   }
 
-  def forAll(p: A => Boolean): Boolean = sys.error("todo")
+  def takeWhileFoldRight(p: A => Boolean): Stream[A] = {
+    foldRight(Empty: Stream[A]) { (elem, acc) =>
+      if (p(elem)) {
+        cons(elem, acc)
+      } else {
+        Empty
+      }
+    }
+  }
+
+  def forAll(p: A => Boolean): Boolean = {
+    foldRight(true) {(elem, acc) =>
+      p(elem) && acc
+    }
+  }
+
+  def headOption: Option[A] = foldRight(None: Option[A]) { (elem, _) => Some(elem) }
+
+  def map[B](f: A => B): Stream[B] = foldRight(Empty: Stream[B]) { (elem, acc) => cons(f(elem), acc) }
+
+  def filter(f: A => Boolean): Stream[A] = foldRight(Stream[A]()) { (elem, acc) =>
+    if(f(elem)) {
+      cons(elem, acc)
+     } else {
+      acc
+    }
+  }
+
+  def append[V >: A](other: => Stream[V]): Stream[V] = foldRight(other) { (elem, acc) => cons(elem, acc) }
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] = foldRight(Empty: Stream[B]) { (elem, acc) => f(elem).append(acc)  }
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
@@ -70,7 +100,28 @@ object Stream {
     else cons(as.head, apply(as.tail: _*))
 
   val ones: Stream[Int] = Stream.cons(1, ones)
-  def from(n: Int): Stream[Int] = sys.error("todo")
+  val onesUnfold: Stream[Int] = unfold(1) { state => Option((1, state)) }
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = sys.error("todo")
+  def constant[A](a: A) : Stream[A] = cons(a, constant(a))
+  def constantUnfold[A](a: A) : Stream[A] = unfold(a) { state => Option((state, state)) }
+
+  def from(n: Int): Stream[Int] = cons(n, from(n + 1))
+  def fromUnfold(n: Int) : Stream[Int] = unfold(n) { state => Option((state, state + 1)) }
+
+  def fibs: Stream[Int] = {
+    def innerGeneration(current: Int, next: Int): Stream[Int] = {
+      cons(current, innerGeneration(next, current + next))
+    }
+
+    innerGeneration(1, 1)
+  }
+  def fibsUnfold: Stream[Int] = unfold((1, 1)) { state => Option(state._1, (state._2, state._1 + state._2)) }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = {
+    val elemAndState = f(z)
+    elemAndState match {
+      case None => Empty
+      case Some((elem, state)) => cons(elem, unfold(state)(f))
+    }
+  }
 }
