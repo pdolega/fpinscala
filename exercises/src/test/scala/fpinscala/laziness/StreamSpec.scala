@@ -23,6 +23,10 @@ class StreamSpec extends WordSpec {
       assert(Stream(1, 2, 3).take(3).toList == Stream(1, 2, 3).toList)
       assert(empty.take(0) == empty)
 
+      assert(Stream(1, 2, 3, 4, 5).takeUnfold(1).toList == Stream(1).toList)
+      assert(Stream(1, 2, 3).takeUnfold(3).toList == Stream(1, 2, 3).toList)
+      assert(empty.takeUnfold(0) == empty)
+
       assert(Stream(1, 2, 3, 4, 5).drop(1).toList == List(2, 3, 4, 5))
       assert(Stream(4, 5).drop(2) == empty)
       assert(Stream(1, 2).drop(0).toList == Stream(1, 2).toList)
@@ -41,6 +45,12 @@ class StreamSpec extends WordSpec {
       assert(Stream('a', 'b', 'c', 'f').takeWhileFoldRight(_ => true).toList == List('a', 'b', 'c', 'f'))
       assert(Stream('a', 'b', 'c', 'f').takeWhileFoldRight(_ > 'z').toList == Nil)
       assert(Empty.takeWhileFoldRight(_ => true).toList == Nil)
+
+      assert(Stream(1, 2, 3, 4, 5).takeWhileUnfold(_ < 2).toList == List(1))
+      assert(Stream('a', 'b', 'c', 'f').takeWhileUnfold(_ < 'c').toList == List('a', 'b'))
+      assert(Stream('a', 'b', 'c', 'f').takeWhileUnfold(_ => true).toList == List('a', 'b', 'c', 'f'))
+      assert(Stream('a', 'b', 'c', 'f').takeWhileUnfold(_ > 'z').toList == Nil)
+      assert(Empty.takeWhileUnfold(_ => true).toList == Nil)
     }
 
     "have correct implementation of forAll" in {
@@ -62,6 +72,9 @@ class StreamSpec extends WordSpec {
 
       assert(Stream(1,2,3).flatMap{ x => Stream(x.toString + 1, x.toString + 2, x.toString + 3) }.toList == List("11", "12", "13", "21", "22", "23", "31", "32", "33"))
       assert(Stream[Int]().flatMap{ x => Stream[String]() }.toList == List[String]())
+
+      assert(Stream(1,2,3).mapUnfold{ _.toString }.toList == Stream("1", "2", "3").toList)
+      assert(Stream[Int]().mapUnfold{ _.toString }.toList == Stream[String]().toList)
     }
 
     "have correct append" in {
@@ -104,6 +117,16 @@ class StreamSpec extends WordSpec {
       assert(Stream.unfold((0, 1)) { state => Some((state._1, (state._2, state._1 + state._2)))}.take(7).toList == List(0, 1, 1, 2, 3, 5, 8))
       assert(Stream.unfold((1)) { state => Some((state, (state + 1)))}.take(5).toList == List(1, 2, 3, 4, 5))
       assert(Stream.unfold((1)) { state => if(state <= 10) Some((state, (state + 1))) else None}.toList == List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+    }
+
+    "have correct implementation of zipWith and zipAll" in {
+      assert(Stream(1, 2, 3).zipWith(Stream(1, 2, 3)).toList == List((1,1),(2,2),(3,3)))
+      assert(Stream(1, 2, 3).zipWith(Stream(1)).toList == List((1,1)))
+      assert(Stream(1, 2, 3).zipWith(Stream("1", "2", "3", "4")).toList == List((1,"1"),(2,"2"),(3,"3")))
+
+
+      assert(Stream(1, 2).zipAll(Stream("1", "2", "3")).toList == List((Some(1),Some("1")),(Some(2),Some("2")),(None,Some("3"))))
+      assert(Stream(1, 2, 3).zipAll(Stream("1", "2")).toList == List((Some(1),Some("1")),(Some(2),Some("2")),(Some(3),None)))
     }
   }
 }
