@@ -17,11 +17,7 @@ class RNGSpec extends WordSpec {
 
   "RNG trait methods" should {
     "have correct implementation of nonNegativeInt" in {
-      val entries = unfold(rng: RNG) { rand =>
-        val (number, newRand) = RNG.nonNegativeInt(rand)
-        Option((number, newRand))
-      }
-
+      val entries = unfoldRandom(rng, RNG.nonNegativeInt)
       assert(entries.take(100).forall(_ >= 0))
     }
 
@@ -29,11 +25,20 @@ class RNGSpec extends WordSpec {
       val fabricatedRng = new RNG {
         override def nextInt: (Int, RNG) = if(System.currentTimeMillis() % 2 == 0) (Integer.MIN_VALUE, this) else (0, this)
       }
-      val entriesMinInt = unfold(fabricatedRng: RNG) { rand =>
-        val (number, newRand) = RNG.nonNegativeInt(rand)
-        Option((number, newRand))
+      val entriesMinInt = unfoldRandom(fabricatedRng, RNG.nonNegativeInt)
+      assert(entriesMinInt.take(100).forall { _ >= 0 })
+    }
+
+    "have correct implementation of double returning <0.0, 1.0)" in {
+      val entries = unfoldRandom(rng, RNG.double)
+      assert(entries.take(100).forall { d => d >= 0.0 && d < 1.0 })
+    }
+
+    def unfoldRandom[A](seed: RNG, randFunc: RNG => (A, RNG)): Stream[A] = {
+      unfold(seed) { rand =>
+        val (a, newRand) = randFunc(rand)
+        Option((a, newRand))
       }
-      assert(entriesMinInt.take(100).forall(_ >= 0))
     }
   }
 }

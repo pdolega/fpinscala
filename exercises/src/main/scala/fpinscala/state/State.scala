@@ -37,7 +37,11 @@ object RNG {
     if(number >= 0) (Math.abs(number), newRng) else nonNegativeInt(newRng)
   }
 
-  def double(rng: RNG): (Double, RNG) = ???
+  def double(rng: RNG): (Double, RNG) = {
+    val (intNum, newRng) = nonNegativeInt(rng)
+    val doubleNum = (intNum % Int.MaxValue / Int.MaxValue.toDouble)
+    (doubleNum, newRng)
+  }
 
   def intDouble(rng: RNG): ((Int,Double), RNG) = ???
 
