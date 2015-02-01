@@ -43,6 +43,10 @@ object RNG {
     (doubleNum, newRng)
   }
 
+  def doubleViaMap: Rand[Double] = {
+    map(nonNegativeInt) { _ / (Int.MaxValue.toDouble + 1.0) }
+  }
+
   def intDouble(rng: RNG): ((Int,Double), RNG) = {
     val (i, newRng) = rng.nextInt
     val (d, nextRng) = double(newRng)
@@ -61,9 +65,29 @@ object RNG {
     ((d1, d2, d3), nextRng3)
   }
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) = ???
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
+    @tailrec
+    def generate(num: Int, newRng: RNG, generated: List[Int]): (List[Int], RNG) = {
+      if(num > 0) {
+        val (i, nextRng) = newRng.nextInt
+        generate(num - 1, nextRng, i :: generated)
+      } else {
+        (generated, newRng)
+      }
+    }
 
-  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = ???
+    generate(count, rng, Nil)
+  }
+
+  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
+    val retRand: Rand[C] = { rng =>
+      val (a, rng1) = ra(rng)
+      val (b, rng2) = rb(rng1)
+      (f(a,b), rng2)
+    }
+
+    retRand
+  }
 
   def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
 
