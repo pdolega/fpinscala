@@ -54,9 +54,11 @@ class RNGSpec extends WordSpec {
     }
 
     "have correct implementation of ints" in {
-      val (ints1, rng1) = RNG.ints(500)(rng)
+      val (ints1, _) = RNG.ints(500)(rng)
       assert(ints1.size == 500)
-      assert(ints1.forall { i => i >= Int.MinValue && i < Int.MaxValue })
+      assert(ints1.forall { checkIntRange })
+
+      assert(RNG.intsViaSequence(500)(rng)._1.forall { checkIntRange })
     }
 
     "have correct implementation of map2" in {
@@ -69,6 +71,12 @@ class RNGSpec extends WordSpec {
       assert(RNG.map2(RNG.doubleInt, RNG.double) { case ((d1, i), d2) => d1 * d2 + i }(rng2)._1 ==
         (3.0 / Int.MaxValue) * (3.0 / Int.MaxValue) + 3.0)
     }
+
+    "have correct implementation of sequence" in {
+      assert(RNG.sequence(List.fill(50) { RNG.nonNegativeInt _ })(rng)._1.forall { i => i >= Int.MinValue && i <= Int.MaxValue })
+      assert(RNG.sequence(List.fill(50) { RNG.double _ })(rng)._1.forall { checkDoubleRange })
+      assert(RNG.sequence(List(RNG.unit(1), RNG.unit(2), RNG.unit(3)))(rng)._1 == List(1, 2, 3))
+    }
   }
 
   private def unfoldRandom[A](seed: RNG, randFunc: RNG => (A, RNG)) = {
@@ -78,7 +86,7 @@ class RNGSpec extends WordSpec {
     }
   }
 
-  private def checkDoubleRange(d: Double) = {
-    d >= 0.0 && d < 1.0
-  }
+  private def checkIntRange(i: Int) = i >= Int.MinValue && i < Int.MaxValue
+
+  private def checkDoubleRange(d: Double) = d >= 0.0 && d < 1.0
 }

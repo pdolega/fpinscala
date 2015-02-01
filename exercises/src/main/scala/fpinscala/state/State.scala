@@ -31,6 +31,8 @@ object RNG {
       (f(a), rng2)
     }
 
+  def nextInt(rng: RNG): (Int, RNG) = rng.nextInt
+
   @tailrec
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (number, newRng) = rng.nextInt
@@ -79,6 +81,8 @@ object RNG {
     generate(count, rng, Nil)
   }
 
+  def intsViaSequence(count: Int): Rand[List[Int]] = sequence(List.fill(count)(nextInt))
+
   def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] = {
     val retRand: Rand[C] = { rng =>
       val (a, rng1) = ra(rng)
@@ -89,7 +93,15 @@ object RNG {
     retRand
   }
 
-  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
+    rng => {
+      val (results, newRng) = fs.foldLeft((Nil: List[A], rng)) { case ((results, currRng), elem) =>
+        val (a, newRng) = elem(rng)
+        (a :: results, newRng)
+      }
+      (results.reverse, newRng)
+    }
+  }
 
   def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
 }
