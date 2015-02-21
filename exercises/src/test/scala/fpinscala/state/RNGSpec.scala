@@ -77,6 +77,22 @@ class RNGSpec extends WordSpec {
       assert(RNG.sequence(List.fill(50) { RNG.double _ })(rng)._1.forall { checkDoubleRange })
       assert(RNG.sequence(List(RNG.unit(1), RNG.unit(2), RNG.unit(3)))(rng)._1 == List(1, 2, 3))
     }
+
+    "have correct flatmap implementation" in {
+      assert(RNG.flatMap(RNG.unit(5)) { a => RNG.unit(a + 1) }(rng)._1 == 6)
+
+      (0 until 100).foreach { _ =>
+        val doubleRand = RNG.flatMap(RNG.doubleViaMap) { a => RNG.unit(a + 1)}(rng)._1
+        assert(doubleRand >= 1 && doubleRand < 2)
+      }
+    }
+
+    "have correct implementation of nonNegativeLessThan" in {
+      (1000 until 2000).foreach { i =>
+        val (value, _) = RNG.nonNegativeLessThan(i)(rng)
+        assert(value < i && value >= 0)
+      }
+    }
   }
 
   private def unfoldRandom[A](seed: RNG, randFunc: RNG => (A, RNG)) = {
